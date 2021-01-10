@@ -1,0 +1,22 @@
+spring:
+  profiles:
+    active: dev
+server:
+  port: 8080
+
+
+---
+spring:
+  profiles:
+    active: dev
+  redis:
+    host: 47.92.71.125
+    port: 6379
+    lettuce:
+      pool:
+        max-active: 500
+        max-idle: 100
+
+    password: topwayzk@123
+
+

@@ -1,0 +1,20 @@
+spring:
+  profiles:
+    active: dev
+
+server:
+  port: 8080
+
+
+---
+spring:
+  profiles:
+    active: dev
+  redis:
+    redisson:
+      file: classpath:redisson.yml
+    port: 6379
+    host: 47.92.71.125
+
+
+
