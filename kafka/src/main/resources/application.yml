@@ -15,7 +15,7 @@ spring:
 customized:
   kafka:
     mt:
-      bootstrap-servers:
+      bootstrap-servers: 49.234.9.34:30262,49.234.9.34:30557,49.234.9.34:30093
       producer:
         acks: 1
         retries: 3

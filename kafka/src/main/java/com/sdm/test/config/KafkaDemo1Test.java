@@ -22,10 +22,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @RunWith(SpringRunner.class)
 public class KafkaDemo1Test {
 
-    public static final String topic_1 =  "test_topic_1";
+    public static final String topic_1 =  "point-push-ali-topic-dev";
 
     @Autowired
-    @Qualifier(KafkaDemo1.beanName)
+    @Qualifier(KafkaDemo1.KAFKA_TEMPLATE)
     private KafkaTemplate kafkaTemplate ;
     @Test
     public void  producer(){

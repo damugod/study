@@ -35,35 +35,38 @@ import java.util.Map;
 @Configuration
 @ConditionalOnProperty(name = {"bootstrap-servers"}, prefix = "customized.kafka.mt")
 public class KafkaDemo1 implements KafkaConfigTemplate {
-    @Value("${customized.kafka.mt.bootstrap-servers}")
+    @Value("${customized.kafka.crm.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Value("${customized.kafka.mt.consumer.auto-offset-reset}")
+    @Value("${customized.kafka.crm.consumer.auto-offset-reset}")
     private String autoOffsetReset;
 
-    @Value("${customized.kafka.mt.producer.retries}")
+    @Value("${customized.kafka.crm.producer.retries}")
     private int retries;
 
-    @Value("${customized.kafka.mt.producer.buffer-memory}")
+    @Value("${customized.kafka.crm.producer.buffer-memory}")
     private long bufferMemory;
 
-    @Value("${customized.kafka.mt.producer.batch-size}")
+    @Value("${customized.kafka.crm.producer.batch-size}")
     private Integer batchSize;
 
-    @Value("${customized.kafka.mt.linger-ms:1000}")
+    @Value("${customized.kafka.crm.linger-ms:1000}")
     private Integer lingerMs;
 
+    public static final String KAFKA_TEMPLATE = "CrmKafkaTemplate" ;
+    public static final String LISTENER_CONTAINER_FACTORY = "CrmKafkaListenerContainerFactory";
+    public static final String PRODUCER_FACTORY = "CrmProducerFactory";
+    public static final String CONSUMER_FACTORY = "CrmConsumerFactory";
 
-    public static final String beanName = "kafka1config" ;
 
-
-
-
-
+    /**
+     * 根据需要在ProducerConfig添加配置信息
+     * @return
+     */
     @Override
-    @Bean
     public Map<String, Object> producerConfigs() {
         Map<String, Object> props = new HashMap<>(10);
+        props.put(ProducerConfig.ACKS_CONFIG,"1");
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ProducerConfig.RETRIES_CONFIG, retries);
         props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, bufferMemory);
@@ -74,8 +77,8 @@ public class KafkaDemo1 implements KafkaConfigTemplate {
     }
 
     @Override
-    @Bean
-    public ProducerFactory<Integer, String> producerFactory() {
+    @Bean(name = PRODUCER_FACTORY)
+    public ProducerFactory<Integer, String> customizedProducerFactory() {
         Map<String, Object> configs = producerConfigs();
 
         DefaultKafkaProducerFactory<Integer, String> producerFactory = new DefaultKafkaProducerFactory(configs, new IntegerSerializer(), new StringSerializer());
@@ -83,13 +86,16 @@ public class KafkaDemo1 implements KafkaConfigTemplate {
     }
 
     @Override
-    @Bean(beanName)
-    public KafkaTemplate<Integer, String> kafkaTemplate() {
-        return new KafkaTemplate(producerFactory());
+    @Bean(name = KAFKA_TEMPLATE)
+    public KafkaTemplate<Integer, String> customizedKafkaTemplate(@Qualifier(PRODUCER_FACTORY) ProducerFactory producerFactory) {
+        return new KafkaTemplate(producerFactory);
     }
 
+    /**
+     * 根据需要在ConsumerConfig添加消费者配置
+     * @return
+     */
     @Override
-    @Bean
     public Map<String, Object> consumerConfigs() {
         Map<String, Object> props = new HashMap<>(10);
 
@@ -109,19 +115,20 @@ public class KafkaDemo1 implements KafkaConfigTemplate {
     }
 
     @Override
-    @Bean
-    public ConsumerFactory<Integer, String> consumerFactory() {
+    @Bean(name = CONSUMER_FACTORY)
+    public ConsumerFactory<Integer, String> customizedConsumerFactory() {
         IntegerDeserializer keyDeserializer = new IntegerDeserializer();
 
         StringDeserializer valueDeserializer = new StringDeserializer();
 
         ConsumerFactory<Integer, String> consumerFactory = new DefaultKafkaConsumerFactory(consumerConfigs(), keyDeserializer, valueDeserializer);
 
-        return consumerFactory;    }
+        return consumerFactory;
+    }
 
     @Override
-    @Bean("kafkaListenerContainerFactory1")
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Integer, String>> kafkaListenerContainerFactory(@Qualifier("consumerFactory")ConsumerFactory<Integer, String> consumerFactory) {
+    @Bean(name = LISTENER_CONTAINER_FACTORY)
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Integer, String>> customizedKafkaListenerContainerFactory(@Qualifier(CONSUMER_FACTORY)ConsumerFactory<Integer, String> consumerFactory) {
         //构建kafka并行消费监听类工厂类 此类通过topic名称创建该topic消费监听
         ConcurrentKafkaListenerContainerFactory<Integer, String> concurrentKafkaListenerContainerFactory =
                 new ConcurrentKafkaListenerContainerFactory<>();
