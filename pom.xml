@@ -6,6 +6,7 @@
     <modules>
         <module>spring-redis-redisson</module>
         <module>redisson-spring-boot-starter</module>
+        <module>kafka</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

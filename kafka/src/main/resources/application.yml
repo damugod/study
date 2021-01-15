@@ -1,0 +1,34 @@
+spring:
+  profiles:
+    active: dev
+
+server:
+  port: 8080
+
+
+---
+spring:
+  profiles:
+    active: dev
+
+
+customized:
+  kafka:
+    mt:
+      bootstrap-servers:
+      producer:
+        acks: 1
+        retries: 3
+        batch-size: 16384
+        buffer-memory: 33554432
+        linger-ms: 2000
+      consumer:
+        group-id: crm-point-transaction-group
+        auto-offset-reset: earliest
+        enable-auto-commit: false
+      listener:
+        concurrency: 1
+
+
+
+
