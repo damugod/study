@@ -1,4 +1,5 @@
-singleServerConfig:
+#singleServerConfig: 单节点使用
+clusterServersConfig:
   # 连接空闲超时，单位：毫秒
   idleConnectionTimeout: 10000
   # 连接超时，单位：毫秒
@@ -11,13 +12,15 @@ singleServerConfig:
   # 命令重试发送时间间隔，单位：毫秒
   retryInterval: 1500
   # 密码
-  password: topwayzk@123
+  password: xxx
   # 单个连接最大订阅数量
   subscriptionsPerConnection: 5
   # 客户端名称
-  clientName: axin
-  #  # 节点地址
-  address: 47.92.71.125:6379
+  clientName: xxx
+  nodeAddresses:
+  - "redis://127.0.0.1:7004"
+  - "redis://127.0.0.1:7001"
+  - "redis://127.0.0.1:7000"
   # 发布和订阅连接的最小空闲连接数
   subscriptionConnectionMinimumIdleSize: 1
   # 发布和订阅连接池大小
@@ -27,13 +30,17 @@ singleServerConfig:
   # 连接池大小
   connectionPoolSize: 64
   # 数据库编号
-  database: 6
+  # database: 单节点使用
+  # 节点地址
+  #address: 单节点使用
   # DNS监测时间间隔，单位：毫秒
   dnsMonitoringInterval: 5000
 # 线程池数量,默认值: 当前处理核数量 * 2
-#threads: 0
+  threads: 16
 # Netty线程池数量,默认值: 当前处理核数量 * 2
-#nettyThreads: 0
+  nettyThreads: 32
+  #拓扑自动刷新时间
+  scanInterval: 1000
 # 编码
 codec: !<org.redisson.codec.JsonJacksonCodec> {}
 # 传输模式

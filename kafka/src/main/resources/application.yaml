@@ -1,0 +1,34 @@
+spring:
+  profiles:
+    active: dev
+
+server:
+  port: 8080
+
+
+---
+spring:
+  profiles:
+    active: dev
+
+  kafka:
+    bootstrap-servers: ${spring_kafka_bootstrap_servers:49.234.9.34:30262,49.234.9.34:30557,49.234.9.34:30093}
+    producer:
+      acks: ${spring_kafka_producer_acks:1}
+      retries: ${spring_kafka_producer_retries:3}
+      batch-size: ${spring_kafka_producer_batch_size:16384}
+      buffer-memory: ${spring_kafka_producer_buffer_memory:33554432}
+    consumer:
+      group-id: ${spring_kafka_consumer_group_id:crm-point-transaction-group}
+      auto-offset-reset: ${spring_kafka_consumer_auto_offset_reset:earliest}
+      enable-auto-commit: ${spring_kafka_consumer_enable_auto_commit:false}
+    listener:
+      concurrency: ${spring_kafka_listener_concurrency:1}
+
+topic:
+  demo: promotion.engine.rule.test
+
+
+
+
+

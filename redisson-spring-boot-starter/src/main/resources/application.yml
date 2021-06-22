@@ -13,8 +13,9 @@ spring:
   redis:
     redisson:
       file: classpath:redisson.yml
-    port: 6379
-    host: 47.92.71.125
+
+
+
 
 
 

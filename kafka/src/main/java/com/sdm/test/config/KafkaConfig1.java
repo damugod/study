@@ -33,30 +33,35 @@ import java.util.Map;
  * @date: 2021/1/13 下午3:57
  */
 @Configuration
-@ConditionalOnProperty(name = {"bootstrap-servers"}, prefix = "customized.kafka.mt")
-public class KafkaDemo1 implements KafkaConfigTemplate {
-    @Value("${customized.kafka.crm.bootstrap-servers}")
+public class KafkaConfig1 implements KafkaConfigTemplate {
+
+    @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Value("${customized.kafka.crm.consumer.auto-offset-reset}")
+
+    @Value("${spring.kafka.consumer.auto-offset-reset}")
     private String autoOffsetReset;
 
-    @Value("${customized.kafka.crm.producer.retries}")
+    @Value("${spring.kafka.producer.retries}")
     private int retries;
 
-    @Value("${customized.kafka.crm.producer.buffer-memory}")
+    @Value("${spring.kafka.producer.buffer-memory}")
     private long bufferMemory;
 
-    @Value("${customized.kafka.crm.producer.batch-size}")
+    @Value("${spring.kafka.producer.batch-size}")
     private Integer batchSize;
 
-    @Value("${customized.kafka.crm.linger-ms:1000}")
+    @Value("${spring.kafka.producer.linger-ms:1000}")
     private Integer lingerMs;
 
-    public static final String KAFKA_TEMPLATE = "CrmKafkaTemplate" ;
-    public static final String LISTENER_CONTAINER_FACTORY = "CrmKafkaListenerContainerFactory";
-    public static final String PRODUCER_FACTORY = "CrmProducerFactory";
-    public static final String CONSUMER_FACTORY = "CrmConsumerFactory";
+    public static final String KAFKA_TEMPLATE = "KafkaTemplate" ;
+    public static final String LISTENER_CONTAINER_FACTORY = "KafkaListenerContainerFactory";
+    public static final String PRODUCER_FACTORY = "ProducerFactory";
+    public static final String CONSUMER_FACTORY = "ConsumerFactory";
+    public static final String CONSUMER_FACTORY_BATCH = "CONSUMER_FACTORY_BATCH";
+    public static final String LISTENER_CONTAINER_FACTORY_BATCH = "LISTENER_CONTAINER_FACTORY_BATCH";
+
+
 
 
     /**
@@ -81,7 +86,7 @@ public class KafkaDemo1 implements KafkaConfigTemplate {
     public ProducerFactory<Integer, String> customizedProducerFactory() {
         Map<String, Object> configs = producerConfigs();
 
-        DefaultKafkaProducerFactory<Integer, String> producerFactory = new DefaultKafkaProducerFactory(configs, new IntegerSerializer(), new StringSerializer());
+        DefaultKafkaProducerFactory<Integer, String> producerFactory = new DefaultKafkaProducerFactory(configs, new StringSerializer(), new StringSerializer());
         return producerFactory;
     }
 
@@ -141,4 +146,56 @@ public class KafkaDemo1 implements KafkaConfigTemplate {
         concurrentKafkaListenerContainerFactory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         return concurrentKafkaListenerContainerFactory;
     }
+
+
+
+    @Bean(CONSUMER_FACTORY_BATCH)
+    public ConsumerFactory<String, String> consumerFactory() {
+
+        final StringDeserializer stringDeserializer = new StringDeserializer();
+
+        Map<String, Object> props = new HashMap<>(10);
+
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+
+        //设置是否自动提交offset 2.3 版本以后默认为false
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 300000);
+
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
+
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+
+        //最大拉取条数2000 最大拉取时间1200s
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,10000);
+
+        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG,1200000);
+
+
+        ConsumerFactory<String, String> consumerFactory = new DefaultKafkaConsumerFactory(props, stringDeserializer, stringDeserializer);
+
+        return consumerFactory;
+    }
+
+    @Bean(name = LISTENER_CONTAINER_FACTORY_BATCH)
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Integer, String>> kafkaListenerContainerFactory(@Qualifier(CONSUMER_FACTORY)ConsumerFactory<Integer, String> consumerFactory) {
+        //构建kafka并行消费监听类工厂类 此类通过topic名称创建该topic消费监听
+        ConcurrentKafkaListenerContainerFactory<Integer, String> concurrentKafkaListenerContainerFactory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        //可通过注解的方式进行设置
+        concurrentKafkaListenerContainerFactory.setConsumerFactory(consumerFactory);
+        //
+        concurrentKafkaListenerContainerFactory.getContainerProperties().setAckOnError(false);
+
+        //是否并发消费
+        concurrentKafkaListenerContainerFactory.setBatchListener(true);
+        //设置ack模型机制 当发生error时 不同处理机制针对与offset有不同处理机制
+        concurrentKafkaListenerContainerFactory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        return concurrentKafkaListenerContainerFactory;
+    }
+
+
 }
