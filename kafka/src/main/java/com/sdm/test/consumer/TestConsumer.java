@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  * @date: 2021/1/15 上午10:51
  */
 @Component
-public class Topic1TestConsumer {
+public class TestConsumer {
 
 
     @KafkaListener(topics ="${topic.demo}" ,
