@@ -83,7 +83,11 @@ public class BatchConsumer {
     }
 
     private void dealMessage(ConsumerRecord<?,?> consumerRecord) {
-        log.info("单条处理");
+        try {
+            log.info("单条处理");
+        } catch (Exception e) {
+            //
+        }
     }
 
 

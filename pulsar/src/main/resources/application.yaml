@@ -1,0 +1,52 @@
+spring:
+  profiles:
+    active: test
+
+server:
+  port: 8080
+
+logging:
+  config: classpath:log4j2-base.xml
+
+log:
+  level: ${log_level:info}
+  path: ${log_path:/var/log/mp/app/promotion/promotion-engine-svc/1}
+
+
+rdc:
+  logging:
+    enable: ${OPEN_RDC_LOGGING:true}
+    print-warn-log: ${PRINT_WARN_LOG:false}
+    kafka-enable: ${OPEN_KAFKA_LOG:false}
+    es-enable: ${OPEN_ES_LOG:false}
+    redis-enable: ${OPEN_REDIS_LOG:true}
+    controller-enable: ${OPEN_CONTROLLER_LOG:true}
+    feign-enable: ${OPEN_FEIGN_LOG:true}
+    redis-cost-time-threshold: ${REDIS_COST_TIME:10}
+    es-cost-time-threshold: ${ES_COST_TIME:20}
+    kafka-cost-time-threshold: ${KAFKA_COST_TIME:20}
+    return-msg-size-threshold: ${RETURN_MSG_SIZE:1048576}
+  pulsar:
+    service-url: pulsar://10.126.154.11:32183
+    allow-interceptor: true
+    consumer:
+      default:
+        dead-letter-policy-max-redeliver-count: 3
+
+
+
+
+---
+spring:
+  profiles:
+    active: dev
+  redis:
+    redisson:
+      file: classpath:redisson.yml
+
+rdc:
+
+
+
+
+
